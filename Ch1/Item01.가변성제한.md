@@ -106,7 +106,7 @@ var surname : String = "Moskala"
 val fullName1: String?
     get() = name?.let { "$it $surname" }
 
-val fullName2: String? = name?.let { "$it $surname" } //final 이고 사용자 정의 게터를 갖지 않는다.
+val fullName2: String? = name?.let { "$it $surname" } //지역변수가 아닌 프로퍼티가 final 이고 사용자 정의 게터를 갖지 않는 경우 스마트캐스트 가능
 
 @Test
 fun smartCast() {
