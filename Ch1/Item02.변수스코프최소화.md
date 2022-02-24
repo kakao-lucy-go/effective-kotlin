@@ -92,6 +92,7 @@ val primes: Sequence<Int> = sequence {
 ```
 
 실행 결과가 이상하게 나오는데 이는 prime을 챕쳐했기 때문이다. sequence를 사용해서 필터링이 지연되어서 최종적인 prime 값만 필터링된다. prime이 2로 설정되어 있을 때 필터링된 4을 제외하면 drop만 동작하므로 그냥 연속된 숫자가 나온다.
+> prime이 2가 된 후 drop 하고 filter 에 1회 실행된 후, 이걸 실질적으로 실행하는 곳(시퀀스는 최종연산때 수행이 된다. toList()처럼..) 이 없어서 filter 의 추가 수행 없이 first, drop 만 수행된다.
 
 (시퀀스 참조 [https://github.com/goyanglee/kotlin_in_action/blob/main/5. 람다로 프로그래밍/5.md](https://github.com/goyanglee/kotlin_in_action/blob/main/5.%20%EB%9E%8C%EB%8B%A4%EB%A1%9C%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/5.md))
 
