@@ -49,7 +49,7 @@ fun main(args: Array<String>) {
 
 이를 그림으로 그리면 다음과 같다.
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/218357a3-d03b-43bf-a4da-6d393f8f5f06/Untitled.png)
+![Untitled](https://github.com/mychum1/effective-kotlin/blob/main/Ch3/effective_kotlin_01.png)
 
 ### 24.1 함수 타입
 
@@ -65,7 +65,7 @@ fun printProcessNumber(transition: (Int) -> Any) { print(transition(42))}
 
 (→ Int 타입의 더 큰 타입이 들어올 수 있고, Any의 더 작은 타입이 나갈 수 있다고 이해함!)
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ee0b608a-c9fc-42f1-9962-014550a32b33/Untitled.png)
+![Untitled](https://github.com/mychum1/effective-kotlin/blob/main/Ch3/effective_kotlin_02.png)
 
 > (?) 코틀린에서 자주 사용되는 것으로는 공변성(out)을 가진 List가 있다. variance 한정자가 붙지 않은 MutableLit와는 다르다. 왜 List를 더 많이 쓰는지 무엇이 다른지 variance 한정자의 안전성과 관련된 내용을 좀 더 살펴보자. ( 1. 그렇다고 해도 자주 사용되는 이유가 공변성이라는게 이해가 안감)
 > 
