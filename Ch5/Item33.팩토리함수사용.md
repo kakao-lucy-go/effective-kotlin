@@ -1,3 +1,5 @@
+# 아이템33. 생성자 대신 팩토리 함수를 사용하라
+
 클래스의 인스턴스를 만드는 가장 일반적인 방법은 기본 생성자를 사용하는 것이다. 다른 방법으로는 디자인 패턴으로 다양한 생성 패턴들이 만들어져 있는데 보통 객체를 생성자로 직접 생성하지 않고 별도의 함수를 통해 생성하는 것이다.
 
 아래 코드는 MyLinkedList 클래스의 인스턴스를 만들어서 제공하는 톱레벨 함수이다.
@@ -167,10 +169,114 @@ intent.startForResult(activity, requestCode)
 
 ### 5.33.4. 확장 팩토리 함수
 
+사용하려는 인터페이스나 클래스에 companion object가 존재할 때 팩토리함수를 사용해야할 때가 있다. 직접 companion object를 수정하지 않고도 만들어야 한다면 확장함수를 사용하면 된다.
+
+```kotlin
+interface Tool {
+	companion object {~}
+}
+
+fun Tool.Companion.createBigTool(~) : BigTool {~}
+```
+
+이런 식으로 사용하면 외부 라이브러리를 확장할 수도 있는데, 단, 적어도 비어있는 companion object가 필요하다.
+
 ### 5.33.5. 톱레벨 팩토리 함수
+
+대표적인 예로 listOf, setOf, mapOp가 있다. List.of(1,2,3) 보다 listOf(1,2,3)이 훨씬 읽기 쉽기 때문에 톱레벨 함수를 사용한다. 하지만 public 톱레벨 함수는 모든 곳에서 사용할 수 있기 때문에 IDE가 제공하는 팁을 복잡하게 만들 수도 있고 클래스 메소드처럼 이름을 만들면 혼란을 일으킬 수 있다.
 
 ### 5.33.6. 가짜 생성자
 
+코틀린의 생성자는 톱레벨 함수와 같은 형태로 사용되기 때문에 톱레벨 함수처럼 참조될 수 있다. (생성자 레퍼런스는 함수 인터페이스로 구현한다.(?))
+
+```kotlin
+class A
+val a = A()
+val reference: () -> A ::A
+```
+
+일반적인 관점에서 생성자는 대문자로 시작하고 함수는 소문자로 시작한다. 하지만 함수가 대문자로 사용할 수도 있는데, 예를 들어 List와 MutableList는 인터페이스라 생성자를 가질 수 없지만 List를 생성자처럼 사용하는 코드가 있다.
+
+```kotlin
+List(4) {'User$it }
+```
+
+바로 List라는 함수가 코틀린 1.1부터 stdlib에 포함되었기 때문이다.
+
+```kotlin
+public inline fun <T> List(size: Int, init: (index: Int) -> T): List<T> = MutableList(size, init)
+public inline fun <T> MutableList(size: Int, init: (index:Int) -> T): MutableList<T> { 
+	val list = ArrayList<T>(size)
+	repeat(size) {index -> list.add(init(index)) }
+	return list
+}
+```
+
+이런 톱레벨 함수는 생성자처럼 보이고 생성자처럼 작동하며 팩토리 함수와 같은 모든 장점을 갖는다. 이를 **가짜 생성자(fake constructor)** 라고 한다.
+
+- 인터페이스를 위한 생성자를 만들고 싶을 때
+- reified 타입 아규먼트를 갖고 싶을 때
+
+가짜 생성자를 사용한다. (이를 제외하면??(?)) 가짜 생성자는 진짜 생성자처럼 동작하며 생성자처럼 보여야한다. 캐싱이나 nullable 타입 리턴, 서브 클래스 리턴 등의 기능을 포함하고 싶으면 companion object에 팩토리 함수를 사용하는 것이 좋다.
+
+가짜 생성자를 선언할 때 invoke 연산자를 갖는 compnanion object를 사용할 수도 있지만 잘 사용하진 않고 ‘아이템 12’에서 살펴본 것처럼 연산자 오버로드는 의미에 맞게 하라는 규칙에 위배되기 때문에 추천하지 않는다.
+
+invoke는 이름 없이 호출될 수 있는 특별한 함수이기 때문에 객체 생성과는 의미가 다르기 때문이다.
+
+```kotlin
+class Tree<T> {
+	companion object{
+		operator fun <T> invoke(size: Int, generator: (Int) -> T): Tree<T> {~}
+	}
+}
+
+Tree(10) {"$it")
+```
+
+또, 지금까지 살펴본 방법을들 모아서 보면 Invoke 함수가 훨씬 복잡하다는 것을 알 수 있다.
+
+1. 생성자
+
+```kotlin
+val f: () -> Tree = ::Tree
+```
+
+1. 가짜 생성자
+
+```kotlin
+val f: () -> Tree = ::Tree
+```
+
+1. invoke 함수를 가지는 companion 객체
+
+```kotlin
+val f: () -> Tree = Tree.companion::invoke
+```
+
+가짜 생성자는 톱레벨 함수를 사용하는 것이 좋고, 기본 생성자를 만들 수 없거나 생성자가 제공하지 않는 기능(reified 타입 파라미터 등: reified가 뭐였지 )으로 생성자를 만들어야 하는 경우에 가짜 생성자를 만드는 것이 좋다.
+
 ### 5.33.7. 팩토리 클래스의 메소드
 
+코틀린에서 점층적 생성자 패턴과 빌더 패턴은 코틀린에서는 의미가 없다.(아이템 34) 팩토리 클래스는 클래스의 상태를 가질 수 있다는 특징 때문에 팩토리 함수보다 다양한 기능을 갖는다.
+
+```kotlin
+data class Student(val id: Int, val name: String, val surname: String)
+
+class StudentFactory {
+	var nextId = 0
+	fun next(name: String, surname: String) = Student(nextId++, name, surname)
+}
+
+val factory = StudentFactory()
+val s1 = factory.next("Marcin", "Moskala")
+```
+
+팩토리 클래스는 프로퍼티를 가질 수 있어서 캐싱을 활용하거나 이전에 만든 객체를 복제해서 객체를 생성하는 등의 기능을 도입할 수 있다.
+
 ### 5.33.8. 정리
+
+1. 가짜 생성자
+2. 톱레벨 팩토리 함수
+3. 확장 팩토리 함수 - companion object 사용 
+
+3번이 가장 자바 정적 팩토리 매소드 패턴과 유사해서 일반적으로 사용하는 패턴이다.
