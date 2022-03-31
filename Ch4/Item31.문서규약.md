@@ -42,6 +42,7 @@
     - @param <name>: 함수 파라미터 또는 클래스, 프로퍼티, 함수 타입 파라미터
     - @return: 함수의 리턴값
     - @constructor: 클래스의 기본 생성자
+    - @receiver: 확장 함수의 리시버
     - @property <name>: 명확한 이름을 갖고 있는 클래스의 프로퍼티. 기본 생성자에 정의된 프로퍼티에 사용
     - @throws <class>, @exception <class>: 내부에서 발생할 수 있는 예외
     - @sample <identifier>: 정규화된 형식 이름을 사용해서 함수의 사용 예를 문서화
